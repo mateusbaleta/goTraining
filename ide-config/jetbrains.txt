@@ -1,0 +1,5 @@
+rm -rf ~/.config/JetBrains/GoLand2021.3/eval
+rm -rf ~/.config/JetBrains/GoLand2021.3/options/other.xml
+touch ~/.config/JetBrains/GoLand2021.3/options/other.xml
+sed -i -E 's/<property name=\"evl.*\".*\/>//' ~/.config/JetBrains/GoLand2021.3/options/other.xml
+rm -rf ~/.java/.userPrefs/jetbrains/goland 
