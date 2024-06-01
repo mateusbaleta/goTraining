@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	_ "encoding/json"
 	_ "github.com/mattn/go-sqlite3"
 	"net/http"
+	_ "net/http/pprof"
+	"strconv"
 )
 
 type User struct {
@@ -14,14 +17,23 @@ type User struct {
 	Email string `json:"email"`
 }
 
+// analise application lag with ---> go tool pprof -seconds 5 http://localhost:6060/debug/pprof/profile
+// calculate fibonacci
+func fibonacci(n int) int {
+	if n <= 1 {
+		return n
+	}
+	return fibonacci(n-1) + fibonacci(n-2)
+}
+
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/users", listenUsersHandler)
 	mux.HandleFunc("POST /users", createUserHandler)
-	err := http.ListenAndServe(":3000", mux)
-	if err != nil {
-		return
-	}
+	mux.HandleFunc("/cpu", CPUIntensiveEndpoint)
+	//http.ListenAndServe(":3000", mux)
+	go http.ListenAndServe(":3000", mux)
+	http.ListenAndServe(":6060", nil)
 }
 
 func listenUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,4 +94,35 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
+}
+
+func CPUIntensiveEndpoint(w http.ResponseWriter, r *http.Request) {
+	result := fibonacci(60)
+	_, err := w.Write([]byte(strconv.Itoa(result)))
+	if err != nil {
+		return
+	}
+}
+
+// GenerateLargeString BENCH TEST 1
+//func GenerateLargeString(n int) string {
+//	var buffer bytes.Buffer
+//	for i := 0; i < n; i++ {
+//		for j := 0; j < 100; j++ {
+//			buffer.WriteString(strconv.Itoa(i + j*j))
+//		}
+//	}
+//	return buffer.String()
+//}
+
+// GenerateLargeString BENCH TEST 2
+func GenerateLargeString(n int) string {
+	var buffer bytes.Buffer
+	buffer.Grow(n * 100)
+	for i := 0; i < n; i++ {
+		for j := 0; j < 100; j++ {
+			buffer.WriteString(strconv.Itoa(i + j*j))
+		}
+	}
+	return buffer.String()
 }

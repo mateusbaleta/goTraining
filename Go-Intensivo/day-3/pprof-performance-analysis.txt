@@ -1,0 +1,35 @@
+go tool pprof -seconds 5 http://localhost:6060/debug/pprof/profile
+Fetching profile over HTTP from http://localhost:6060/debug/pprof/profile?seconds=5
+Please wait... (5s)
+Saved profile in /home/user/pprof/pprof.main.samples.cpu.001.pb.gz
+File: main
+Build ID: 9d9cc6f9e6ba734957d39c5cadf86dfc5fdda187
+Type: cpu
+Time: Jun 1, 2024 at 7:47pm (-03)
+Duration: 5.12s, Total samples = 4.99s (97.38%)
+Entering interactive mode (type "help" for commands, "o" for options)
+(pprof) top
+Showing nodes accounting for 4.99s, 100% of 4.99s total
+      flat  flat%   sum%        cum   cum%
+     4.99s   100%   100%      4.99s   100%  main.fibonacci
+         0     0%   100%      4.99s   100%  main.CPUIntensiveEndpoint
+         0     0%   100%      4.99s   100%  net/http.(*ServeMux).ServeHTTP
+         0     0%   100%      4.99s   100%  net/http.(*conn).serve
+         0     0%   100%      4.99s   100%  net/http.HandlerFunc.ServeHTTP
+         0     0%   100%      4.99s   100%  net/http.serverHandler.ServeHTTP
+(pprof) list CPUCPUIntensiveEndpoint
+no matches found for regexp: CPUCPUIntensiveEndpoint
+(pprof) main.CPUIntensiveEndpoint
+unrecognized command: "main.CPUIntensiveEndpoint"
+(pprof) list main.CPUIntensiveEndpoint
+Total: 4.99s
+ROUTINE ======================== main.CPUIntensiveEndpoint in /home/smooth/Documents/Git/personal_git/mateusbaleta/goTraining/Go-Intensivo/day-3/main.go
+         0      4.99s (flat, cum)   100% of Total
+         .          .     97:func CPUIntensiveEndpoint(w http.ResponseWriter, r *http.Request) {
+         .      4.99s     98:	result := fibonacci(60)
+         .          .     99:	_, err := w.Write([]byte(strconv.Itoa(result)))
+         .          .    100:	if err != nil {
+         .          .    101:		return
+         .          .    102:	}
+         .          .    103:}
+(pprof)
